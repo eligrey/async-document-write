@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Asynchronous document.write test</title>
+<script type="application/javascript" src="async-document-write.min.js"></script>
+<script type="text/javascript">
+var test = 0;
+</script>
+<script type="text/javascript" src="test.js?1" async="true"></script>
+</head>
+<body>
+<pre><script type="text/javascript" id="writeln-test" async="true">
+document.write.to = "writeln-test"
+document.writeln("document.writeln");
+document.writeln("test");
+delete document.write.to;
+</script></pre>
+<script type="text/javascript" src="test.js?2" async="true"></script>
+</body>
+</html>
