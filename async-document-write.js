@@ -93,7 +93,7 @@
 			writeTo  = write.to;
 			
 			if (!body) {
-				writeQueue.push(markup, writeTo);
+				writeQueue.unshift(markup, writeTo);
 				return;
 			}
 			
