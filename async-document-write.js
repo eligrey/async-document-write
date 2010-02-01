@@ -1,7 +1,7 @@
 /*
  * Asynchronous document.write
  *
- * 2009-12-13
+ * 2010-02-01
  *
  * By Elijah Grey, http://eligrey.com
  *
@@ -33,7 +33,11 @@
 		var err = e;
 	}
 	
-	if ("fileName" in err || "stacktrace" in err || "stack" in err) {
+	var filename = "fileName",
+	stack        = "stack",
+	stacktrace   = stack + "trace";
+	
+	if (filename in err || stacktrace in err || stack in err) {
 	
 		var doc        = document,
 		anchor         = doc.createElement("a"),
@@ -41,56 +45,67 @@
 		notReady       = !False,
 		writeQueue     = [],
 		nativeDocWrite = doc.write,
-		getElemsByTag  = function (tag) {
+		getElemsByTag  = function (doc, tag) {
 			return doc.getElementsByTagName(tag);
 		},
-		head = getElemsByTag("head")[0],
+		head = getElemsByTag(doc, "head")[0],
 		write,
 		domReady = function () {
 			if (notReady) {
 				notReady = False;
-				var i = writeQueue.length,
-				writeTo;
-				while (i--) {
-					writeTo = write.to;
+				var writeTo = write.to;
+				while (writeQueue.length) {
 					write.to = writeQueue.pop();
-					write(writeQueue.pop());
-					write.to = writeTo;
+					write.call(doc, writeQueue.pop());
+					delete write.to;
 				}
+				write.to = writeTo;
 			}
 		},
-		getLocation = function (error) {
+		getErrorLocation = function (error) {
 			var loc, replacer = function (stack, matchedLoc) {
 				loc = matchedLoc;
 			};
 		
-			if ("fileName" in error) {
-				loc = error.fileName;
-			} else if ("stacktrace" in error) { // Opera
-				error.stacktrace.replace(/Line \d+ of .+ script (.*)/gm, replacer);
-			} else if ("stack" in error) { // WebKit
-				error.stack.replace(/at (.*)/gm, replacer);
-				loc = loc.replace(/:\d+:\d+$/, "");
+			if (filename in error) {
+				loc = error[filename];
+			} else if (stacktrace in error) { // Opera
+				error[stacktrace].replace(/Line \d+ of .+ script (.*)/gm, replacer);
+			} else if (stack in error) { // WebKit
+				error[stack].replace(/at (.*)/gm, replacer);
+				loc = loc.replace(/:\d+:\d+$/, ""); // remove line number
 			}
 			return loc;
 		},
+		slice = Array.prototype.slice,
+		toStr = Object.prototype.toString,
 	
-		addEvtListener, remEvtListener;
+		addEvtListener, remEvtListener, listener;
 	
 		if ((addEvtListener = doc.addEventListener) &&
 	        (remEvtListener = doc.removeEventListener))
 		{
-			var listener = function (evt) {
-				remEvtListener.call(doc, evt.type, arguments.callee, False);
+			listener = function (evt) {
+				remEvtListener.call(doc, evt.type, listener, False);
 				domReady();
 			};
 			addEvtListener.call(doc, "DOMContentLoaded", listener, False);
 			addEvtListener.call(doc, "load", listener, False);
+		
+		} else if ((addEvtListener = doc.attachEvent) &&
+	        (remEvtListener = doc.detachEvent))
+		{
+			listener = function () {
+				remEvtListener.call(doc, "onload", listener);
+			};
+			addEvtListener.call(doc, "onload", listener);
 		}
 		
-		write = doc.write = function (markup) {
-			var body = getElemsByTag("body")[0],
-			writeTo  = write.to;
+		write = doc.write = function () {
+			var markup = slice.call(arguments).join(""),
+			doc        = this,
+			body       = getElemsByTag(doc, "body")[0],
+			writeTo    = write.to;
 			
 			if (!body) {
 				writeQueue.unshift(markup, writeTo);
@@ -101,15 +116,15 @@
 			node.innerHTML = markup;
 			
 			if (writeTo) {
-				if (Object.prototype.toString.call(write.to) === "[object String]") {
+				if (toStr.call(writeTo) === "[object String]") {
 					// document.write.to is an element ID
-					var el = doc.getElementById(write.to);
+					var el = doc.getElementById(writeTo);
 					el.parentNode.insertBefore(node, el);
 					return;
 				}
-				anchor.href = getLocation(writeTo);
+				anchor.href = getErrorLocation(writeTo);
 				var src = anchor.href,
-				scripts = getElemsByTag("script");
+				scripts = getElemsByTag(doc, "script");
 				
 				anchor.removeAttribute("href");
 				
@@ -129,12 +144,14 @@
 						return;
 					}
 				}
-			} else { // inline script without document.write.to
-				nativeDocWrite.call(doc, markup);
+			} else {
+				// inline script without document.write.to attempting to write to the body
+				// (not the document element) before it exists (requires native magic)
+				nativeDocWrite.apply(doc, arguments);
 			}
 		};
-		doc.writeln = function (markup) {
-			write(markup + "\n");
+		doc.writeln = function () {
+			write.apply(this, slice.call(arguments).concat("\n"));
 		};
 		write.START = "try{0()}catch(e){document.write.to=e}";
 		write.END   = "delete document.write.to";
