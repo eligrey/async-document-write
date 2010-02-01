@@ -5,7 +5,7 @@ MIT/X11 license.
 MIT/X11 license
 ---------------
 
-Copyright (c) 2009 Elijah Grey, http://eligrey.com
+Copyright (c) 2010 [Elijah Grey]
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -32,7 +32,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 GNU GPL v3 license
 ------------------
 
-Copyright (c) 2009 Elijah Grey, http://eligrey.com
+Copyright (c) 2010 [Elijah Grey]
 
 This software is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -46,3 +46,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+
+  [Elijah Grey]: http://eligrey.com
