@@ -30,3 +30,7 @@ Usage
       document.write(...);
       delete document.write.to;
     </script>
+
+
+
+![](//in.getclicky.com/212712ns.gif)
