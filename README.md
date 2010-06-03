@@ -13,24 +13,15 @@ do is add `eval(document.write.START);` to the start of the code and
 `eval(document.write.END);` to the end. If the target page does not have ADW loaded,
 your code will behave as it would normally.
 
+
 Usage
 -----
-
-### External scripts
 
     eval(document.write.START);
     document.write(...);
     eval(document.write.END);
 
 
-### Inline scripts
-
-    <script type="text/javascript" id="foobar" async="true">
-      document.write.to = "foobar";
-      document.write(...);
-      delete document.write.to;
-    </script>
-
-
+Please note that ADW does not support inline scripts.
 
 ![Tracking image](//in.getclicky.com/212712ns.gif =1x1)

@@ -1,7 +1,7 @@
 /*
  * Asynchronous document.write
  *
- * 2010-02-01
+ * 2010-06-02
  *
  * By Eli Grey, http://eligrey.com
  *
@@ -9,17 +9,9 @@
  *   See COPYING.md
  *
  * Usage:
- *   External scripts:
- *     eval(document.write.START);
- *     document.write(...);
- *     eval(document.write.END);
- *
- *   Inline scripts:
- *     <script id="foo" async="true">
- *       document.write.to = "foo";
- *       document.write(...);
- *       delete document.write.to;
- *     </script>
+ *   eval(document.write.START);
+ *   document.write(...);
+ *   eval(document.write.END);
  */
 
 /*global document */
@@ -45,20 +37,23 @@
 		notReady       = !False,
 		writeQueue     = [],
 		nativeDocWrite = doc.write,
-		getElemsByTag  = function (doc, tag) {
+		getElemsByTag  = function (tag) {
 			return doc.getElementsByTagName(tag);
 		},
-		head = getElemsByTag(doc, "head")[0],
+		head = getElemsByTag("head")[0],
 		write,
 		domReady = function () {
 			if (notReady) {
 				notReady = False;
-				var writeTo = write.to;
-				while (writeQueue.length) {
-					write.to = writeQueue.pop();
-					write.call(doc, writeQueue.pop());
+				var writeTo = write.to,
+				item = 0, len = writeQueue.length;
+				
+				for (; item < len; item++) {
+					write.to = writeQueue[item++];
+					write(writeQueue[item]);
 					delete write.to;
 				}
+				writeQueue = null;
 				write.to = writeTo;
 			}
 		},
@@ -103,35 +98,25 @@
 		
 		write = doc.write = function () {
 			var markup = slice.call(arguments).join(""),
-			doc        = this,
-			body       = getElemsByTag(doc, "body")[0],
+			body       = getElemsByTag("body")[0],
 			writeTo    = write.to;
 			
 			if (!body) {
-				writeQueue.unshift(markup, writeTo);
+				writeQueue.push(writeTo, markup);
 				return;
 			}
 			
-			var node = doc.createElement("span");
-			node.innerHTML = markup;
-			
 			if (writeTo) {
-				if (toStr.call(writeTo) === "[object String]") {
-					// document.write.to is an element ID
-					var el = doc.getElementById(writeTo);
-					el.parentNode.insertBefore(node, el);
-					return;
-				}
-				anchor.href = getErrorLocation(writeTo);
+				anchor.href = getErrorLocation(writeTo); // normalize error URI
 				var src = anchor.href,
-				scripts = getElemsByTag(doc, "script");
+				scripts = getElemsByTag("script"),
+				node = doc.createElement("span");
+				node.innerHTML = markup;
 				
-				anchor.removeAttribute("href");
-				
-				for (var i = 0, l = scripts.length; i < l; i++) {
-					anchor.href = scripts.item(i).src;
+				for (var script = 0, len = scripts.length; script < len; script++) {
+					anchor.href = scripts.item(script).src; // normalize script URI
 					if (anchor.href === src) {
-						var scriptNode = scripts.item(i), parent = scriptNode;
+						var scriptNode = scripts.item(script), parent = scriptNode;
 						
 						while (parent = parent.parentNode) {
 							if (parent === head) {
@@ -140,13 +125,12 @@
 							}
 						}
 						scriptNode.parentNode.insertBefore(node, scriptNode);
-						anchor.removeAttribute("href");
 						return;
 					}
 				}
 			} else {
-				// inline script without document.write.to attempting to write to the body
-				// (not the document element) before it exists (requires native magic)
+				// script without document.write.to attempting to write to the body
+				// before it exists - requires native magic
 				nativeDocWrite.apply(doc, arguments);
 			}
 		};
