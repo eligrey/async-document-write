@@ -16,6 +16,8 @@
 
 /*global document */
 
+/*! @source http://purl.eligrey.com/github/async-document-write/blob/master/async-document-write.js*/
+
 (function () {
 	"use strict";
 	
