@@ -1,16 +1,15 @@
 /*
  * Asynchronous document.write
  *
- * 2010-06-02
+ * 2010-10-12
  *
  * By Eli Grey, http://eligrey.com
- *
- * License: GNU GPL v3 and the X11/MIT license
- *   See COPYING.md
+ * Licensed under the X11/MIT License
+ *   See LICENSE.md
  *
  * Usage:
  *   eval(document.write.START);
- *   document.write(...);
+ *   document.write(html);
  *   eval(document.write.END);
  */
 
@@ -79,9 +78,9 @@
 	
 		addEvtListener, remEvtListener, listener;
 	
-		if ((addEvtListener = doc.addEventListener) &&
-	        (remEvtListener = doc.removeEventListener))
-		{
+		if (doc.addEventListener && doc.removeEventListener) {
+			addEvtListener = doc.addEventListener;
+			remEvtListener = doc.removeEventListener;
 			listener = function (evt) {
 				remEvtListener.call(doc, evt.type, listener, False);
 				domReady();
@@ -89,9 +88,9 @@
 			addEvtListener.call(doc, "DOMContentLoaded", listener, False);
 			addEvtListener.call(doc, "load", listener, False);
 		
-		} else if ((addEvtListener = doc.attachEvent) &&
-	        (remEvtListener = doc.detachEvent))
-		{
+		} else if (doc.attachEvent && doc.detachEvent) {
+			addEvtListener = doc.attachEvent;
+			remEvtListener = doc.detachEvent;
 			listener = function () {
 				remEvtListener.call(doc, "onload", listener);
 			};
