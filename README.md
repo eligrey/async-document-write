@@ -24,4 +24,4 @@ Usage
 
 Please note that ADW does not support inline scripts.
 
-![Tracking image](//in.getclicky.com/212712ns.gif)
+![Tracking image](https://in.getclicky.com/212712ns.gif)
