@@ -10,8 +10,8 @@ compatible with normal `document.write` and it also implements an asynchronous
 ADW can be utilized by providers of HTML "emebedding" scripts to enable the scripts to
 be included asynchronously (a la `<script async>`) when ADW is loaded. All you have to
 do is add `eval(document.write.START);` to the start of the code and
-`eval(document.write.END);` to the end. If the target page does not have ADW loaded,
-your code will behave as it would normally.
+`eval(document.write.END);` to the end. **If the target page does not have ADW loaded,
+your code will behave as it would normally.**
 
 
 Usage
