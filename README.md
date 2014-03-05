@@ -11,8 +11,8 @@ ADW can be utilized by providers of HTML "emebedding" scripts to enable the scri
 be included asynchronously (a la `<script async>`) when ADW is loaded. All you have to
 do is add `eval(document.write.START);` to the start of the code and
 `eval(document.write.END);` to the end. **If the target page does not have ADW loaded,
-your code will behave as it would normally.** The evals simple do nothing and produce
-no errors if ADW isn't loaded.
+your code will behave as it would normally.** The evals simply do nothing and produce
+no errors if ADW is not loaded.
 
 
 Usage
