@@ -22,7 +22,4 @@ Usage
     document.write(...);
     eval(document.write.END);
 
-
-Please note that ADW does not support inline scripts.
-
 ![Tracking image](https://in.getclicky.com/212712ns.gif)
