@@ -7,6 +7,11 @@
 <script type="text/javascript" src="test1.js" async></script>
 </head>
 <body>
+<script type="text/javascript" async>
+eval(document.write.START);
+document.write("<div style='font-size:xx-large'>This should be second</div>");
+eval(document.write.END);
+</script>
 <script type="text/javascript" src="test2.js" async></script>
 </body>
 </html>

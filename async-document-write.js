@@ -1,7 +1,7 @@
 /*
  * Asynchronous document.write
  *
- * 2018-01-10.2
+ * 2018-01-10.3
  *
  * By Eli Grey, http://eligrey.com
  * Licensed under the MIT License
@@ -59,10 +59,6 @@
 			}
 		},
 		getErrorLocation = function (error) {
-			if ("src" in error) {
-				return error.src;
-			}
-
 			var loc, replacer = function (stack, matchedLoc) {
 				loc = matchedLoc;
 			};
@@ -112,26 +108,37 @@
 			}
 			
 			if (writeTo) {
-				anchor.href = getErrorLocation(writeTo); // normalize error URI
-				var src = anchor.href,
-				scripts = getElemsByTag("script"),
-				node = doc.createElement("span");
-				node.innerHTML = markup;
-				
-				for (var script = 0, len = scripts.length; script < len; script++) {
-					anchor.href = scripts.item(script).src; // normalize script URI
-					if (anchor.href === src) {
-						var scriptNode = scripts.item(script), parent = scriptNode;
-						
-						while (parent = parent.parentNode) {
-							if (parent === head) {
-								body.insertBefore(node, body.firstChild);
-								return;
-							}
+				var targetScript;
+				if (writeTo instanceof HTMLScriptElement) {
+					targetScript = writeTo;
+				} else {
+					anchor.href = getErrorLocation(writeTo); // normalize error URI
+					var src = anchor.href,
+					scripts = getElemsByTag("script");
+					
+					for (var script = 0, len = scripts.length; script < len; script++) {
+						var scriptNode = scripts.item(script);
+						anchor.href = scriptNode.src; // normalize script URI
+						if (anchor.href === src) {
+							targetScript = scripts.item(script);
+							break;
 						}
-						scriptNode.parentNode.insertBefore(node, scriptNode);
-						return;
 					}
+				}
+				
+				if (targetScript) {
+					var parent = targetScript,
+					node = doc.createElement("template");
+					node.innerHTML = markup;
+					
+					while (parent = parent.parentNode) {
+						if (parent === head) {
+							body.insertBefore(node.content || node, body.firstChild);
+							return;
+						}
+					}
+					targetScript.parentNode.insertBefore(node.content || node, targetScript);
+					return;
 				}
 			} else {
 				// script without document.write.to attempting to write to the body
