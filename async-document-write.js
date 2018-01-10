@@ -1,7 +1,7 @@
 /*
  * Asynchronous document.write
  *
- * 2010-10-12
+ * 2018-01-10
  *
  * By Eli Grey, http://eligrey.com
  * Licensed under the MIT License
@@ -59,6 +59,10 @@
 			}
 		},
 		getErrorLocation = function (error) {
+			if (doc.currentScript && doc.currentScript.src) {
+				return doc.currentScript.src;
+			}
+
 			var loc, replacer = function (stack, matchedLoc) {
 				loc = matchedLoc;
 			};
