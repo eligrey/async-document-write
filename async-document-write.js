@@ -1,7 +1,7 @@
 /*
  * Asynchronous document.write
  *
- * 2018-01-10.1
+ * 2018-01-10.2
  *
  * By Eli Grey, http://eligrey.com
  * Licensed under the MIT License
@@ -30,7 +30,7 @@
 	stack        = "stack",
 	stacktrace   = stack + "trace";
 	
-	if (filename in err || stacktrace in err || stack in err) {
+	if (document.currentScript || filename in err || stacktrace in err || stack in err) {
 	
 		var doc        = document,
 		anchor         = doc.createElement("a"),
